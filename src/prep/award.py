@@ -13,19 +13,21 @@ def prepare_award_xlsx(movie_awards_xlsx, sheet_name, awards_csv, awards_movie_c
 
     awards = award_sheet[AWARD_COLUMN].apply(split_cell).explode()
     awards = awards[awards != ""]
-    awards = awards.drop_duplicates()
+    awards = awards.drop_duplicates().tolist()
 
-    awards.to_csv(awards_csv, sheet_name="Award", index=False)
+    result_awards = pd.DataFrame(awards, columns=["name"])
+
+    result_awards.to_csv(awards_csv)
 
     movies_awards_columns = award_sheet[MOVIE_AWARDS_COLUMNS]
     movies_awards = []
 
     for index, row in movies_awards_columns.iterrows():
         current_awards = split_cell(row[AWARD_COLUMN]) if row[AWARD_COLUMN] != "" else []
-        current_title = f"{row[MOVIE_AWARDS_COLUMNS[0]]}-{row[MOVIE_AWARDS_COLUMNS[1]].strftime('%d.%m.%Y')}"
+        current_title = f"{row[MOVIE_AWARDS_COLUMNS[0]]}-{row[MOVIE_AWARDS_COLUMNS[1]].strftime('%Y-%m-%d')}"
 
         for current_award in current_awards:
             movies_awards.append([current_title, current_award])
 
     movies_awards = pd.DataFrame(movies_awards, columns=["title", "awards"])
-    movies_awards.to_csv(awards_movie_csx, sheet_name="Movie_Award", index=False)
+    movies_awards.to_csv(awards_movie_csx)
