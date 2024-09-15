@@ -1,10 +1,10 @@
 CREATE TABLE IF NOT EXISTS movie
 (
-    title                    varchar(256) PRIMARY KEY,
+    title                    varchar(512) PRIMARY KEY,
     release_date             date NOT NULL,
-    worldwide_box_office     int,
-    domestic_box_office      int,
-    international_box_office int
+    worldwide_box_office     bigint,
+    domestic_box_office      bigint,
+    international_box_office bigint
 );
 
 CREATE TABLE IF NOT EXISTS award
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS review
 (
     id          SERIAL PRIMARY KEY,
     movie_title varchar(256) REFERENCES movie NOT NULL,
-    idvscore    int                           NOT NULL CHECK ( idvscore > 0 ),
+    idvscore    int                           NOT NULL CHECK ( idvscore >= 0 ),
     role        REVIEW_ROLE                   NOT NULL
 );
 
