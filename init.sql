@@ -34,5 +34,17 @@ CREATE TABLE IF NOT EXISTS review
     role        REVIEW_ROLE                   NOT NULL
 );
 
+CREATE OR REPLACE VIEW avg_of_expert_reviews AS
+SELECT m.title, AVG(r.idvscore) as idvscore
+FROM movie m
+         JOIN review r ON m.title = r.movie_title and r.role = 'expert'
+GROUP BY m.title;
+
+CREATE OR REPLACE VIEW avg_of_user_reviews AS
+SELECT m.title, AVG(r.idvscore) as idvscore
+FROM movie m
+         JOIN review r ON m.title = r.movie_title and r.role = 'user'
+GROUP BY m.title;
+
 
 
