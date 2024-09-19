@@ -1,7 +1,7 @@
-pip install psycopg2
-import psycopg2
-import pandas as pd
+# Haider
+
 import matplotlib.pyplot as plt
+import pandas as pd
 from sqlalchemy import create_engine
 
 # Database connection details
