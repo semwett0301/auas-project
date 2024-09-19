@@ -1,38 +1,30 @@
-import pandas as pd
-from sqlalchemy import create_engine
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 import psycopg2
-import numpy as np
+import pandas as pd
 
-class BoxOfficeDataEncapsulator:
-    def __init__(self, db_config):
-        """
-        Initializes the BoxOfficeDataEncapsulator object with a database configuration.
-        :param db_config: Dictionary containing database connection parameters.
-        """
-        self.db_config = db_config
-        self.engine = self._create_engine()
-        self.data = None
-
-    def _create_engine(self):
-        """
-        Creates a database connection engine using SQLAlchemy.
-        :return: SQLAlchemy engine object.
-        """
+class MovieDataEncapsulator:
+    def __init__(self, host, dbname, user, password):
+        # Store database connection parameters
+        self.host = host
+        self.dbname = dbname
+        self.user = user
+        self.password = password
+    
+    def _connect(self):
+        # Private method to handle connection to the database
         try:
-            conn_string = f"postgresql://{self.db_config['user']}:{self.db_config['password']}@{self.db_config['host']}:{self.db_config['port']}/{self.db_config['dbname']}"
-            return create_engine(conn_string)
+            connection = psycopg2.connect(
+                host=self.host,
+                dbname=self.dbname,
+                user=self.user,
+                password=self.password
+            )
+            return connection
         except Exception as e:
-            print(f"Error creating engine: {e}")
-            raise
+            print(f"Error connecting to the database: {e}")
+            return None
 
-    def fetch_box_office_data(self):
-        """
-        Fetches the box office data from the Movie table in the database,
-        classifying movies into Peak and Off-Peak seasons.
-        Stores the result in the instance's `data` attribute.
-        """
+    def fetch_movie_data(self):
+        # Query to fetch movie data and season classification
         query = """
         SELECT title,
                release_date,
@@ -45,114 +37,37 @@ class BoxOfficeDataEncapsulator:
                END AS season
         FROM "Movie";
         """
+
+        # Establish connection and execute query
+        connection = self._connect()
+        if connection is None:
+            return None
+        
         try:
-            # Execute the query and store the result as a DataFrame
-            self.data = pd.read_sql(query, self.engine)
-            return self.data
+            # Use pandas to execute the query and load results into a DataFrame
+            df = pd.read_sql_query(query, connection)
+            return df
         except Exception as e:
             print(f"Error fetching data: {e}")
             return None
+        finally:
+            # Close the connection after the query
+            connection.close()
 
-    def preprocess_data(self):
-        """
-        Preprocesses the data for statistical analysis and machine learning.
-        Handles missing values, feature engineering, and data scaling.
-        :return: Preprocessed pandas DataFrame.
-        """
-        if self.data is None:
-            raise ValueError("Data has not been fetched. Call fetch_box_office_data first.")
+# Usage
+# Initialize the encapsulator with database connection details
+encapsulator = MovieDataEncapsulator(
+    host="localhost", 
+    dbname="AUAS Data", 
+    user="postgres", 
+    password="data12"
+)
 
-        # Handle missing values (can be customized)
-        self.data.fillna(0, inplace=True)
+# Fetch the data
+movie_data_df = encapsulator.fetch_movie_data()
 
-        # Convert categorical variables (like 'season') to numerical if needed for ML
-        self.data['season'] = self.data['season'].apply(lambda x: 1 if x == 'Peak Season' else 0)
-
-        # Scaling the numeric columns
-        scaler = StandardScaler()
-        numeric_cols = ['worldwide_box_office', 'international_box_office', 'domestic_box_office']
-        self.data[numeric_cols] = scaler.fit_transform(self.data[numeric_cols])
-
-        return self.data
-
-    def split_data_for_ml(self, target_column='worldwide_box_office'):
-        """
-        Splits the dataset into training and testing sets for machine learning.
-        :param target_column: The column to predict (default: 'worldwide_box_office').
-        :return: X_train, X_test, y_train, y_test.
-        """
-        if self.data is None:
-            raise ValueError("Data has not been fetched or preprocessed. Call fetch_box_office_data and preprocess_data first.")
-
-        # Defining features (X) and target (y)
-        X = self.data.drop(columns=[target_column, 'title', 'release_date'])
-        y = self.data[target_column]
-
-        # Splitting into training and test sets (80% train, 20% test)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        return X_train, X_test, y_train, y_test
-
-    def get_summary_statistics(self):
-        """
-        Returns summary statistics of the dataset for statistical analysis.
-        :return: Summary statistics as a pandas DataFrame.
-        """
-        if self.data is None:
-            raise ValueError("Data has not been fetched. Call fetch_box_office_data first.")
-
-        return self.data.describe()
-
-    def calculate_correlations(self):
-        """
-        Calculates correlations between numeric features in the dataset.
-        :return: Correlation matrix as a pandas DataFrame.
-        """
-        if self.data is None:
-            raise ValueError("Data has not been fetched. Call fetch_box_office_data first.")
-
-        # Drop non-numeric columns (like 'title', 'release_date')
-        numeric_data = self.data.drop(columns=['title', 'release_date'])
-        return numeric_data.corr()
-
-    def close_connection(self):
-        """
-        Closes the database connection if necessary.
-        """
-        self.engine.dispose()
-
-
-# Example usage:
-
-# Database connection details
-db_config = {
-    'dbname': 'AUAS Data',
-    'user': 'postgres',
-    'password': 'data12',
-    'host': 'localhost',  # or your server's address
-    'port': '5432',       # default PostgreSQL port
-}
-
-# Initialize the BoxOfficeDataEncapsulator object
-box_office_encapsulator = BoxOfficeDataEncapsulator(db_config)
-
-# Fetch the box office data
-df = box_office_encapsulator.fetch_box_office_data()
-
-# Preprocess the data for ML/statistical analysis
-preprocessed_data = box_office_encapsulator.preprocess_data()
-
-# Split the data for machine learning
-X_train, X_test, y_train, y_test = box_office_encapsulator.split_data_for_ml()
-
-# Get summary statistics
-summary_stats = box_office_encapsulator.get_summary_statistics()
-
-# Calculate correlations
-correlations = box_office_encapsulator.calculate_correlations()
-
-# Close the database connection
-box_office_encapsulator.close_connection()
-
-# Output examples
-print(summary_stats)
-print(correlations)
+# Display the resulting DataFrame
+if movie_data_df is not None:
+    print(movie_data_df.head())  # Show the first few rows for verification
+else:
+    print("Failed to fetch data.")
