@@ -1,6 +1,6 @@
 # Haider
 
-import pandas as pd
+import pandas as pd  #importing pandas here
 import psycopg2
 
 
@@ -13,7 +13,7 @@ class MovieDataEncapsulator:
         self.password = password
     
     def _connect(self):
-        # Private method to handle connection to the database
+        #  connection to the database
         try:
             connection = psycopg2.connect(
                 host=self.host,
@@ -47,7 +47,7 @@ class MovieDataEncapsulator:
             return None
         
         try:
-            # Use pandas to execute the query and load results into a DataFrame
+            # I am using pandas to execute the query and load results into a DataFrame
             df = pd.read_sql_query(query, connection)
             return df
         except Exception as e:
