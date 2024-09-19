@@ -128,7 +128,7 @@ db_config = {
     'dbname': 'AUAS Data',
     'user': 'postgres',
     'password': 'data12',
-    'host': 'localhost',  # or your server's address
+    'host': 'localhost',  # server's address
     'port': '5432',       # default PostgreSQL port
 }
 
