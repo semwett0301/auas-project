@@ -13,7 +13,7 @@ db_config = {
     'port': '5432',       # default PostgreSQL port
 }
 
-# Establish a connection to PostgreSQL using psycopg2
+# Here i am establishing a connection to PostgreSQL using psycopg2
 conn_string = f"postgresql://{db_config['user']}:{db_config['password']}@{db_config['host']}:{db_config['port']}/{db_config['dbname']}"
 engine = create_engine(conn_string)
 
@@ -31,7 +31,7 @@ SELECT title,
 FROM "Movie";
 """
 
-# Fetch the data into a pandas DataFrame
+# Fetching the data here into a pandas DataFrame
 df = pd.read_sql(query, engine)
 
 # Group by season and calculate total and average box office sales
@@ -41,10 +41,10 @@ season_group = df.groupby('season').agg({
     'international_box_office': ['sum', 'mean']
 }).reset_index()
 
-# Flatten multi-level columns
+# Flattening here multi-level columns
 season_group.columns = ['season', 'total_worldwide', 'avg_worldwide', 'total_domestic', 'avg_domestic', 'total_international', 'avg_international']
 
-# Plotting the data
+# Plotting the data here
 fig, ax = plt.subplots(1, 3, figsize=(18, 6))
 
 # Plot 1: Worldwide Box Office
@@ -61,6 +61,6 @@ ax[1].set_ylabel('Total Domestic Box Office ($)')
 ax[2].bar(season_group['season'], season_group['total_international'], color=['#ff9999','#66b3ff'])
 ax[2].set_title('Total International Box Office by Season')
 ax[2].set_ylabel('Total International Box Office ($)')
-
+# this will show the diagram
 plt.tight_layout()
 plt.show()
