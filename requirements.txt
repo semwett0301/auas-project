@@ -3,3 +3,6 @@ numpy==1.24.3
 python-dotenv==1.0.1
 sqlalchemy==2.0.34
 psycopg2==2.9.9
+scipy
+seaborn
+matplotlib

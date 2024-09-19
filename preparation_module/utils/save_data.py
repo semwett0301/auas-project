@@ -1,5 +1,5 @@
 from preparation_module.settings import USE_CSV
-from preparation_module.utils.db import engine
+from common_module.db import engine
 
 
 def save_data(data, csv_path, table_name):

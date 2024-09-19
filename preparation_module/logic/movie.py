@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import pandas as pd
+from sqlalchemy.dialects.mssql.information_schema import columns
 
 from preparation_module.utils.movie_check import check_movie_existence
 from preparation_module.utils.numbers import convert_to_int
@@ -73,8 +74,8 @@ def prepare_movie_csv(sales_csv, result_csv):
     source_columns = pd.read_csv(sales_csv, usecols=SPECIFIED_COLUMNS, sep=';')
 
     results = source_columns.apply(prepare_movie, axis=1).tolist()
-    movies = pd.DataFrame(results,
-                          columns=["title", "release_date"])
+    movies = (pd.DataFrame(results, columns=["title", "release_date"])
+              .drop_duplicates(subset=['title']))
 
     save_data(movies, result_csv, "movie")
 
