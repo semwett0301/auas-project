@@ -22,6 +22,10 @@ This is a project in which the provided data is prepared, a database with them i
 4. Run command from the root directory (or do it via your IDE) `python ./preparation_module/index.py`
 5. See result in the mentioned directory
 
+## ERD 
+
+![](./img/erd.png)
+
 ## Folder structure
 * `common_module` - the part of project with database connection's configuration
 * `preparation_script` - script that prepares the data and insert it to DB (starts as Docker container)
