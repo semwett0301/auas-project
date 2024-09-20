@@ -18,7 +18,7 @@ def make_datasets_same_length(user_dataset, expert_dataset):
     return user_dataset[:min_length], expert_dataset[:min_length]
 
 
-# The function is removing emissions from dataset by the interquartile range method
+# The function is removing emissions from dataset by the k-mean method
 def emissions_removal(dataset):
     mean = np.mean(dataset)
     std = np.std(dataset)
@@ -137,3 +137,7 @@ print(
     "The results of comparison the average of both datasets is applicable" if result_p >= SIGNIFICANT_LEVEL else "The results of comparison are not applicable")
 
 plot_the_distribution_density(user_avg_box_office_dataset, expert_avg_box_office_dataset)
+
+if result_p >= SIGNIFICANT_LEVEL:
+    print(f"The result growth is {growth}")
+    print("User reviews affects more on the worlwide box office" if growth >= 0 else "Expert reviews affects more on the worlwide box office")
